@@ -514,6 +514,39 @@
         let fardosRestantes = 0; // Cantidad de fardos restantes
         let garrafonesVendidos = 0; // Cantidad de garrafones vendidos
 
+        // Cargar datos guardados al iniciar la página
+        function loadSavedData() {
+            const savedInventory = localStorage.getItem("inventory");
+            const savedSales = localStorage.getItem("sales");
+            const savedExpenses = localStorage.getItem("expenses");
+            const savedSalesHistory = localStorage.getItem("salesHistory");
+            const savedInventoryHistory = localStorage.getItem("inventoryHistory");
+
+            if (savedInventory) inventory = JSON.parse(savedInventory);
+            if (savedSales) sales = JSON.parse(savedSales);
+            if (savedExpenses) expenses = JSON.parse(savedExpenses);
+            if (savedSalesHistory) salesHistory = JSON.parse(savedSalesHistory);
+            if (savedInventoryHistory) inventoryHistory = JSON.parse(savedInventoryHistory);
+
+            // Actualizar la UI con los datos cargados
+            updateInventoryList();
+            updateSalesHistory();
+            updateExpensesHistory();
+            updateSalesSummary();
+        }
+
+        // Guardar datos en localStorage
+        function saveData() {
+            localStorage.setItem("inventory", JSON.stringify(inventory));
+            localStorage.setItem("sales", JSON.stringify(sales));
+            localStorage.setItem("expenses", JSON.stringify(expenses));
+            localStorage.setItem("salesHistory", JSON.stringify(salesHistory));
+            localStorage.setItem("inventoryHistory", JSON.stringify(inventoryHistory));
+        }
+
+        // Cargar datos al iniciar la página
+        loadSavedData();
+
         // Función para mostrar pestañas
         function showTab(tabName) {
             // Ocultar todas las pestañas
@@ -596,6 +629,9 @@
 
             // Mostrar mensaje de éxito
             showSuccessMessage("Producto agregado al inventario con éxito.");
+
+            // Guardar datos en localStorage
+            saveData();
 
             // Exportar automáticamente a Excel
             autoExportToExcel();
@@ -757,6 +793,9 @@
             // Mostrar mensaje de éxito
             showSuccessMessage("Venta realizada con éxito.");
 
+            // Guardar datos en localStorage
+            saveData();
+
             // Exportar automáticamente a Excel
             autoExportToExcel();
         }
@@ -790,6 +829,9 @@
 
             // Mostrar mensaje de éxito
             showSuccessMessage("Gasto agregado con éxito.");
+
+            // Guardar datos en localStorage
+            saveData();
 
             // Exportar automáticamente a Excel
             autoExportToExcel();
@@ -982,6 +1024,9 @@
 
             // Mostrar mensaje de éxito
             showSuccessMessage("Venta modificada con éxito.");
+
+            // Guardar datos en localStorage
+            saveData();
 
             // Exportar automáticamente a Excel
             autoExportToExcel();
