@@ -324,18 +324,6 @@
             font-size: 1.1rem;
             margin-bottom: 5px;
         }
-
-        /* Estilos para mensajes de éxito */
-        .success-message {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px;
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            border-radius: 5px;
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -369,9 +357,6 @@
 
             <h2>Historial de Inventario</h2>
             <ul id="inventory-history" class="inventory-list"></ul>
-
-            <!-- Botón para abrir archivo Excel -->
-            <button class="export-button" onclick="openExcelFile()">Abrir Excel</button>
         </div>
 
         <div id="sales" class="tab-content active">
@@ -490,15 +475,9 @@
             </p>
 
             <!-- Botón para guardar como imagen -->
-            <button class="export-button" onclick="saveAsImage()">Guardar Imagen</button>
-
-            <!-- Botón para exportar a Excel -->
-            <button class="export-button" onclick="exportToExcel()">Exportar a Excel</button>
+            <button class="export-button" onclick="saveAsImage()">Guardar</button>
         </div>
     </div>
-
-    <!-- Mensaje de éxito -->
-    <div id="success-message" class="success-message">Operación realizada con éxito</div>
 
     <script>
         // Variables globales
@@ -513,39 +492,6 @@
         let fardosCambiados = 0; // Cantidad de fardos cambiados
         let fardosRestantes = 0; // Cantidad de fardos restantes
         let garrafonesVendidos = 0; // Cantidad de garrafones vendidos
-
-        // Cargar datos guardados al iniciar la página
-        function loadSavedData() {
-            const savedInventory = localStorage.getItem("inventory");
-            const savedSales = localStorage.getItem("sales");
-            const savedExpenses = localStorage.getItem("expenses");
-            const savedSalesHistory = localStorage.getItem("salesHistory");
-            const savedInventoryHistory = localStorage.getItem("inventoryHistory");
-
-            if (savedInventory) inventory = JSON.parse(savedInventory);
-            if (savedSales) sales = JSON.parse(savedSales);
-            if (savedExpenses) expenses = JSON.parse(savedExpenses);
-            if (savedSalesHistory) salesHistory = JSON.parse(savedSalesHistory);
-            if (savedInventoryHistory) inventoryHistory = JSON.parse(savedInventoryHistory);
-
-            // Actualizar la UI con los datos cargados
-            updateInventoryList();
-            updateSalesHistory();
-            updateExpensesHistory();
-            updateSalesSummary();
-        }
-
-        // Guardar datos en localStorage
-        function saveData() {
-            localStorage.setItem("inventory", JSON.stringify(inventory));
-            localStorage.setItem("sales", JSON.stringify(sales));
-            localStorage.setItem("expenses", JSON.stringify(expenses));
-            localStorage.setItem("salesHistory", JSON.stringify(salesHistory));
-            localStorage.setItem("inventoryHistory", JSON.stringify(inventoryHistory));
-        }
-
-        // Cargar datos al iniciar la página
-        loadSavedData();
 
         // Función para mostrar pestañas
         function showTab(tabName) {
@@ -575,10 +521,6 @@
         // Función para validar que solo se ingresen números
         function validateNumber(input) {
             input.value = input.value.replace(/[^0-9.]/g, ''); // Solo permite números y puntos
-            // Validar que no haya múltiples puntos
-            if ((input.value.match(/\./g) || []).length > 1) {
-                input.value = input.value.slice(0, -1); // Eliminar el último carácter si hay más de un punto
-            }
         }
 
         // Función para manejar la tecla Enter
@@ -587,16 +529,6 @@
                 event.preventDefault(); // Evitar el comportamiento por defecto
                 action(); // Ejecutar la acción correspondiente
             }
-        }
-
-        // Función para mostrar mensajes de éxito
-        function showSuccessMessage(message) {
-            const successMessage = document.getElementById('success-message');
-            successMessage.textContent = message;
-            successMessage.style.display = 'block';
-            setTimeout(() => {
-                successMessage.style.display = 'none';
-            }, 3000);
         }
 
         // Función para agregar productos al inventario
@@ -626,15 +558,6 @@
 
             // Limpiar el formulario
             document.getElementById('inventory-quantity').value = '';
-
-            // Mostrar mensaje de éxito
-            showSuccessMessage("Producto agregado al inventario con éxito.");
-
-            // Guardar datos en localStorage
-            saveData();
-
-            // Exportar automáticamente a Excel
-            autoExportToExcel();
         }
 
         // Función para actualizar la lista de inventario
@@ -727,7 +650,23 @@
                 return;
             }
 
-            // Si el producto es "Cambio de fardo", el precio debe ser 0
+            // Si el producto es "Fardos", validar el precio
+            if (product === "Fardos" && (isNaN(total) || total <= 0)) {
+                alert("Por favor, ingresa un precio válido para los fardos.");
+                return;
+            }
+
+            // Validar existencia de Garrafones
+            if (product === "Garrafones") {
+                const garrafonesItem = inventory.find(item => item.product === "Garrafones");
+                if (!garrafonesItem || garrafonesItem.quantity < quantity) {
+                    alert("No hay suficientes Garrafones en el inventario.");
+                    return;
+                }
+                garrafonesItem.quantity -= quantity; // Reducir inventario
+            }
+
+            // Lógica para "Cambio de fardo"
             if (product === "Cambio de fardo") {
                 total = 0; // No hay precio en el cambio de fardo
                 const fardosItem = inventory.find(item => item.product === "Fardos");
@@ -738,25 +677,15 @@
                 fardosItem.quantity -= quantity;
                 fardosCambiados += quantity;
             } 
-            // Si el producto es "Garrafones", calcular el precio automáticamente
+            // Lógica para Garrafones
             else if (product === "Garrafones") {
                 total = quantity * 2; // Precio fijo de $2 por garrafón
-                priceInput.value = total.toFixed(2); // Mostrar el precio calculado
-                const garrafonesItem = inventory.find(item => item.product === "Garrafones");
-                if (!garrafonesItem || garrafonesItem.quantity < quantity) {
-                    alert("No hay suficientes Garrafones en el inventario.");
-                    return;
-                }
-                garrafonesItem.quantity -= quantity; // Reducir inventario
+                priceInput.value = total.toFixed(2);
                 garrafonesVendidos += quantity; // Actualizar la cantidad de garrafones vendidos
             }
-            // Si el producto es "Fardos", validar el precio
-            else if (product === "Fardos") {
-                if (isNaN(total) || total <= 0) {
-                    alert("Por favor, ingresa un precio válido para los fardos.");
-                    return;
-                }
-                const inventoryItem = inventory.find(item => item.product === "Fardos");
+            // Lógica para Fardos normales
+            else {
+                const inventoryItem = inventory.find(item => item.product === product);
                 if (!inventoryItem || inventoryItem.quantity < quantity) {
                     alert("No hay suficiente stock para realizar la venta.");
                     return;
@@ -789,15 +718,6 @@
             quantityInput.value = '';
             priceInput.value = '';
             quantityInput.focus(); // Volver al campo de cantidad
-
-            // Mostrar mensaje de éxito
-            showSuccessMessage("Venta realizada con éxito.");
-
-            // Guardar datos en localStorage
-            saveData();
-
-            // Exportar automáticamente a Excel
-            autoExportToExcel();
         }
 
         // Función para agregar un gasto
@@ -826,15 +746,6 @@
             // Limpiar el formulario de gastos
             document.getElementById('expense-description').value = '';
             document.getElementById('expense-amount').value = '';
-
-            // Mostrar mensaje de éxito
-            showSuccessMessage("Gasto agregado con éxito.");
-
-            // Guardar datos en localStorage
-            saveData();
-
-            // Exportar automáticamente a Excel
-            autoExportToExcel();
         }
 
         // Función para actualizar el historial de gastos
@@ -1021,15 +932,6 @@
             updateInventoryList();
             updateSalesSummary();
             updateSalesHistory();
-
-            // Mostrar mensaje de éxito
-            showSuccessMessage("Venta modificada con éxito.");
-
-            // Guardar datos en localStorage
-            saveData();
-
-            // Exportar automáticamente a Excel
-            autoExportToExcel();
         }
 
         // Función para guardar como imagen
@@ -1038,8 +940,9 @@
 
             // Obtener la fecha y hora actual
             const now = new Date();
-            const formattedDate = now.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' });
-            const fileName = `Venta de Ruta ${formattedDate.replace(/\D/g, '')}.jpg`;
+            const formattedDate = now.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const formattedTime = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false });
+            const fileName = `Venta de Ruta ${formattedDate} ${formattedTime}.jpg`;
 
             // Opciones para mejorar la resolución
             const scale = 2; // Aumentar la escala para mejorar la resolución
@@ -1049,119 +952,13 @@
                 useCORS: true, // Permitir imágenes externas (si las hay)
             }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = fileName; // Usar el nombre del archivo con fecha
+                link.download = fileName; // Usar el nombre del archivo con fecha y hora
                 link.href = canvas.toDataURL('image/jpeg', 1.0); // Calidad máxima
                 link.click();
             }).catch(error => {
                 console.error("Error al generar la imagen:", error);
                 alert("Hubo un error al intentar guardar la imagen. Por favor, inténtalo de nuevo.");
             });
-        }
-
-        // Función para exportar a Excel (actualiza el archivo existente)
-        function exportToExcel() {
-            const now = new Date();
-            const formattedDate = now.toISOString().split('T')[0].replace(/-/g, ''); // Formato YYYYMMDD
-            const fileName = `Venta_de_Ruta_${formattedDate}.xlsx`; // Nombre del archivo con fecha
-
-            // Crear un libro de Excel
-            const workbook = XLSX.utils.book_new();
-
-            // Crear hojas de Excel
-            const inventorySheet = XLSX.utils.json_to_sheet(inventoryHistory);
-            const salesSheet = XLSX.utils.json_to_sheet(salesHistory);
-            const expensesSheet = XLSX.utils.json_to_sheet(expenses);
-
-            // Crear una hoja para el resumen
-            const summaryData = [
-                ["Total Vendido", totalSales.toFixed(2)],
-                ["Total de Gastos", totalExpenses.toFixed(2)],
-                ["Total de Ingresos", (totalSales - totalExpenses).toFixed(2)],
-                ["Fardos Vendidos", fardosVendidos],
-                ["Fardos Cambiados", fardosCambiados],
-                ["Fardos Restantes", fardosRestantes],
-                ["Garrafones Vendidos", garrafonesVendidos],
-                ["Garrafones Restantes", garrafonesRestantes]
-            ];
-            const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
-
-            // Agregar hojas al libro
-            XLSX.utils.book_append_sheet(workbook, inventorySheet, "Inventario");
-            XLSX.utils.book_append_sheet(workbook, salesSheet, "Ventas");
-            XLSX.utils.book_append_sheet(workbook, expensesSheet, "Gastos");
-            XLSX.utils.book_append_sheet(workbook, summarySheet, "Resumen");
-
-            // Exportar el archivo Excel (sobrescribe el archivo existente)
-            XLSX.writeFile(workbook, fileName);
-
-            // Mostrar mensaje de éxito
-            showSuccessMessage("Archivo Excel actualizado automáticamente.");
-        }
-
-        // Función para exportar automáticamente a Excel
-        function autoExportToExcel() {
-            exportToExcel();
-        }
-
-        // Función para abrir un archivo Excel
-        function openExcelFile() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.xlsx';
-
-            input.onchange = (event) => {
-                const file = event.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const data = new Uint8Array(e.target.result);
-                        const workbook = XLSX.read(data, { type: 'array' });
-
-                        // Cargar datos del inventario
-                        const inventorySheet = workbook.Sheets["Inventario"];
-                        if (inventorySheet) {
-                            inventoryHistory = XLSX.utils.sheet_to_json(inventorySheet);
-                            updateInventoryList();
-                        }
-
-                        // Cargar datos de ventas
-                        const salesSheet = workbook.Sheets["Ventas"];
-                        if (salesSheet) {
-                            salesHistory = XLSX.utils.sheet_to_json(salesSheet);
-                            updateSalesHistory();
-                        }
-
-                        // Cargar datos de gastos
-                        const expensesSheet = workbook.Sheets["Gastos"];
-                        if (expensesSheet) {
-                            expenses = XLSX.utils.sheet_to_json(expensesSheet);
-                            updateExpensesHistory();
-                        }
-
-                        // Cargar datos del resumen
-                        const summarySheet = workbook.Sheets["Resumen"];
-                        if (summarySheet) {
-                            const summaryData = XLSX.utils.sheet_to_json(summarySheet, { header: 1 });
-                            if (summaryData.length > 0) {
-                                totalSales = parseFloat(summaryData[0][1]) || 0;
-                                totalExpenses = parseFloat(summaryData[1][1]) || 0;
-                                fardosVendidos = parseInt(summaryData[3][1]) || 0;
-                                fardosCambiados = parseInt(summaryData[4][1]) || 0;
-                                fardosRestantes = parseInt(summaryData[5][1]) || 0;
-                                garrafonesVendidos = parseInt(summaryData[6][1]) || 0;
-                                garrafonesRestantes = parseInt(summaryData[7][1]) || 0;
-                            }
-                        }
-
-                        // Actualizar la UI
-                        updateSalesSummary();
-                        showSuccessMessage("Datos cargados desde el archivo Excel.");
-                    };
-                    reader.readAsArrayBuffer(file);
-                }
-            };
-
-            input.click();
         }
 
         // Función para actualizar la fecha actual
@@ -1176,7 +973,5 @@
     </script>
     <!-- Incluir la librería html2canvas al final del body -->
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <!-- Incluir la librería SheetJS para exportar a Excel -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 </body>
 </html>
