@@ -177,67 +177,59 @@
 
         /* Responsive */
         @media (max-width: 768px) {
-            /* Ajustar el tamaño de los botones de las pestañas */
             .tabs {
                 display: grid;
-                grid-template-columns: repeat(2, 1fr); /* 2 columnas */
+                grid-template-columns: repeat(2, 1fr);
                 gap: 10px;
             }
 
             .tab-button {
                 width: 100%;
-                padding: 10px 15px; /* Reducir el padding */
-                font-size: 14px; /* Reducir el tamaño de la fuente */
+                padding: 10px 15px;
+                font-size: 14px;
             }
 
-            /* Ajustar el tamaño de los títulos */
             h1 {
-                font-size: 1.8rem; /* Reducir el tamaño del título principal */
+                font-size: 1.8rem;
             }
 
             h2 {
-                font-size: 1.5rem; /* Reducir el tamaño de los títulos secundarios */
+                font-size: 1.5rem;
             }
 
             h3 {
-                font-size: 1.2rem; /* Reducir el tamaño de los títulos terciarios */
+                font-size: 1.2rem;
             }
 
-            /* Ajustar el tamaño de los campos de entrada */
             input[type="text"], select {
-                font-size: 14px; /* Reducir el tamaño de la fuente */
-                padding: 8px; /* Reducir el padding */
+                font-size: 14px;
+                padding: 8px;
             }
 
-            /* Ajustar el tamaño de los botones */
             button {
-                padding: 10px 15px; /* Reducir el padding */
-                font-size: 14px; /* Reducir el tamaño de la fuente */
+                padding: 10px 15px;
+                font-size: 14px;
             }
 
-            /* Ajustar el tamaño de las listas */
             .inventory-list li, .sales-list li, .sales-history li, .expenses-history li {
-                font-size: 12px; /* Reducir el tamaño de la fuente */
-                padding: 8px; /* Reducir el padding */
+                font-size: 12px;
+                padding: 8px;
             }
 
-            /* Ajustar el tamaño de las tablas */
             table, th, td {
-                font-size: 12px; /* Reducir el tamaño de la fuente */
-                padding: 8px; /* Reducir el padding */
+                font-size: 12px;
+                padding: 8px;
             }
 
-            /* Ajustar el tamaño de los textos en las secciones de resumen */
             .fardos-section h3, .garrafones-section h3 {
-                font-size: 1.2rem; /* Reducir el tamaño de la fuente */
+                font-size: 1.2rem;
             }
 
             .fardos-section p, .garrafones-section p {
-                font-size: 1rem; /* Reducir el tamaño de la fuente */
+                font-size: 1rem;
             }
         }
 
-        /* Nuevos estilos para los campos de texto en la pestaña de Ventas y Gastos */
         .sales-fields, .expenses-fields {
             display: flex;
             gap: 10px;
@@ -248,7 +240,6 @@
             flex: 1;
         }
 
-        /* Estilo para los grupos de opciones (radio buttons) */
         .radio-group {
             display: flex;
             gap: 20px;
@@ -261,9 +252,8 @@
             gap: 8px;
         }
 
-        /* Estilos para la sección de Gastos */
         .gastos-section {
-            color: #2c3e50; /* Color oscuro */
+            color: #2c3e50;
             margin-bottom: 20px;
         }
 
@@ -289,9 +279,8 @@
             font-weight: bold;
         }
 
-        /* Estilos para la sección de Fardos */
         .fardos-section {
-            color: #e67e22; /* Color naranja */
+            color: #e67e22;
             margin-bottom: 20px;
         }
 
@@ -307,9 +296,8 @@
             margin-bottom: 5px;
         }
 
-        /* Estilos para la sección de Garrafones */
         .garrafones-section {
-            color: #27ae60; /* Color verde */
+            color: #27ae60;
             margin-bottom: 20px;
         }
 
@@ -423,15 +411,9 @@
 
             <h2>Resumen de Ventas y Gastos</h2>
             <table id="sales-table">
-                <thead id="sales-table-head">
-                    <!-- Las columnas se generarán dinámicamente -->
-                </thead>
-                <tbody id="sales-table-body">
-                    <!-- Las filas se generarán dinámicamente -->
-                </tbody>
-                <tfoot id="sales-table-foot">
-                    <!-- Los totales se generarán dinámicamente -->
-                </tfoot>
+                <thead id="sales-table-head"></thead>
+                <tbody id="sales-table-body"></tbody>
+                <tfoot id="sales-table-foot"></tfoot>
             </table>
             <p class="total-sales"><strong>Total Vendido:</strong> $<span id="total-sales">0.00</span></p>
 
@@ -476,6 +458,9 @@
 
             <!-- Botón para guardar como imagen -->
             <button class="export-button" onclick="saveAsImage()">Guardar</button>
+
+            <!-- Botón para limpiar todos los datos -->
+            <button onclick="clearAllData()">Limpiar Todos los Datos</button>
         </div>
     </div>
 
@@ -558,6 +543,9 @@
 
             // Limpiar el formulario
             document.getElementById('inventory-quantity').value = '';
+
+            // Guardar en localStorage
+            saveInventory();
         }
 
         // Función para actualizar la lista de inventario
@@ -718,6 +706,10 @@
             quantityInput.value = '';
             priceInput.value = '';
             quantityInput.focus(); // Volver al campo de cantidad
+
+            // Guardar en localStorage
+            saveSales();
+            saveCounters();
         }
 
         // Función para agregar un gasto
@@ -746,6 +738,9 @@
             // Limpiar el formulario de gastos
             document.getElementById('expense-description').value = '';
             document.getElementById('expense-amount').value = '';
+
+            // Guardar en localStorage
+            saveExpenses();
         }
 
         // Función para actualizar el historial de gastos
@@ -932,6 +927,10 @@
             updateInventoryList();
             updateSalesSummary();
             updateSalesHistory();
+
+            // Guardar en localStorage
+            saveSales();
+            saveCounters();
         }
 
         // Función para guardar como imagen
@@ -968,8 +967,79 @@
             document.getElementById('current-date').textContent = formattedDate;
         }
 
-        // Mostrar la pestaña de ventas por defecto al cargar la página
-        showTab('sales');
+        // Función para guardar el inventario en localStorage
+        function saveInventory() {
+            localStorage.setItem('inventory', JSON.stringify(inventory));
+            localStorage.setItem('inventoryHistory', JSON.stringify(inventoryHistory));
+        }
+
+        // Función para guardar las ventas en localStorage
+        function saveSales() {
+            localStorage.setItem('sales', JSON.stringify(sales));
+            localStorage.setItem('salesHistory', JSON.stringify(salesHistory));
+            localStorage.setItem('totalSales', JSON.stringify(totalSales));
+        }
+
+        // Función para guardar los gastos en localStorage
+        function saveExpenses() {
+            localStorage.setItem('expenses', JSON.stringify(expenses));
+            localStorage.setItem('totalExpenses', JSON.stringify(totalExpenses));
+        }
+
+        // Función para guardar los contadores de fardos y garrafones
+        function saveCounters() {
+            localStorage.setItem('fardosVendidos', JSON.stringify(fardosVendidos));
+            localStorage.setItem('fardosCambiados', JSON.stringify(fardosCambiados));
+            localStorage.setItem('garrafonesVendidos', JSON.stringify(garrafonesVendidos));
+        }
+
+        // Función para cargar datos desde localStorage
+        function loadData() {
+            inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+            inventoryHistory = JSON.parse(localStorage.getItem('inventoryHistory')) || [];
+            sales = JSON.parse(localStorage.getItem('sales')) || [];
+            salesHistory = JSON.parse(localStorage.getItem('salesHistory')) || [];
+            totalSales = JSON.parse(localStorage.getItem('totalSales')) || 0;
+            expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+            totalExpenses = JSON.parse(localStorage.getItem('totalExpenses')) || 0;
+            fardosVendidos = JSON.parse(localStorage.getItem('fardosVendidos')) || 0;
+            fardosCambiados = JSON.parse(localStorage.getItem('fardosCambiados')) || 0;
+            garrafonesVendidos = JSON.parse(localStorage.getItem('garrafonesVendidos')) || 0;
+
+            updateInventoryList();
+            updateSalesSummary();
+            updateSalesHistory();
+            updateExpensesHistory();
+        }
+
+        // Función para limpiar todos los datos
+        function clearAllData() {
+            localStorage.clear();
+            inventory = [];
+            inventoryHistory = [];
+            sales = [];
+            salesHistory = [];
+            totalSales = 0;
+            expenses = [];
+            totalExpenses = 0;
+            fardosVendidos = 0;
+            fardosCambiados = 0;
+            garrafonesVendidos = 0;
+
+            updateInventoryList();
+            updateSalesSummary();
+            updateSalesHistory();
+            updateExpensesHistory();
+
+            alert("Todos los datos han sido eliminados.");
+        }
+
+        // Cargar datos al iniciar la página
+        window.onload = function () {
+            loadData();
+            showTab('sales');
+            updateCurrentDate();
+        };
     </script>
     <!-- Incluir la librería html2canvas al final del body -->
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
